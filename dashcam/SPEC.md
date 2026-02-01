@@ -18,8 +18,11 @@ Raspberry Pi 5 上で
   - 主要依存: Picamera2, OpenCV, FastAPI, libgpiod(gpioset)。
 - `sensor_service`
   - 役割1: MMC5983MA 磁気センサの方位角取得、UI向けSSE配信。
-  - 役割2: MMC5983MA 磁気センサの方位角取得、UI向けSSE配信。
-  - 主要依存1: smbus2, FastAPI。【F:dashcam/sensor_service/app.py†L1-L259】
+  - 役割2: TSD10 シングルポイントLiDARの距離取得(m単位)、最大10m UI向けSSE配信。
+  - 役割3: SHT31-DIS 高精度温湿度センサーの温度(℃)と相対湿度 UI向けSSE配信。
+  - 主要依存1: smbus2, FastAPI。
+  - 主要依存2:
+  - 主要依存2: 
 
 ## ディレクトリ構成
 - `dashcam/camera_service/`
@@ -43,7 +46,7 @@ Raspberry Pi 5 上で
 
 ### 静止画撮影
 - `/api/capture/shot` にPOSTすると、2台分の静止画を同一セッションIDで保存。
-- 保存先: `${CAM_STORE_DIR}/cam0/<session>/<index>.jpg` と `${CAM_STORE_DIR}/cam1/<session>/<index>.jpg`。
+- 保存先: `${CAM_STORE_DIR}/<session>/cam0_セッションID.jpg` と `${CAM_STORE_DIR}/cam1/<session>/cam1_セッションID.jpg`。
 - セッションIDは `YYYYMMDD_HHMMSS` 形式。連番は6桁ゼロ埋め。
 - `download` エンドポイントで保存画像を取得可能。【F:dashcam/camera_service/app.py†L28-L185】
 
@@ -52,9 +55,8 @@ Raspberry Pi 5 上で
 - 受信ボディ: `{ "ev": <float> }`。【F:dashcam/camera_service/app.py†L28-L175】
 
 ### LED 制御
-- `GET /api/led`: 現在のLED状態、GPIOチップ名、ライン番号を返す。
-- `POST /api/led`: `on` を指定してON/OFFを切替。
-- `gpioset` プロセスを保持することでライン出力を維持する。エラー時は500を返す。【F:dashcam/camera_service/app.py†L71-L171】
+-制御1　PWM系統1　スライダーによる明るさ調整、トグルによるoN/OFF
+-制御2　PWM系統2　スライダーによる明るさ調整、トグルによるoN/OFF
 
 ### 静的UI配信
 - `GET /` は `/ui/` へリダイレクト。

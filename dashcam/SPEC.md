@@ -1,18 +1,25 @@
 # Dashcam 仕様書
 
 ## 目的
-Raspberry Pi 5 上でデュアルカメラのプレビュー/撮影、LED(MOSFET)制御、磁気センサの方位角計測、距離センサ表示(UI上のダッシュボード)を提供する。バックエンドは2つのFastAPIサービスで構成される。UIは `camera_service` の静的配信で提供される。【F:dashcam/camera_service/app.py†L1-L185】【F:dashcam/sensor_service/app.py†L1-L259】【F:dashcam/camera_service/static/index.html†L1-L153】
+Raspberry Pi 5 上で
+・Raspberry Pi カメラモジュール V3（広角）×2のプレビューとパラメーター調整/撮影
+・２系統あるLEDのPWM制御
+・磁気センサ(Qwiic Micro - MMC5983MA搭載 磁気センサ)の方位角計測を可視化　×1
+・距離センサ(シングルポイントLiDAR TSD10)情報の可視化　×1
+・温度センサーによる外気温と筐体内温度の可視化(SHT31使用 高精度温湿度センサーモジュールキット)×2
+を提供する。
 
 ## システム構成
+-`UI_service`
+  - UIの配信　HTML/CSS/JS で構成。`sensor_service` のSSEに接続し、方位角/距離情報を表示。
+  - 主要依存: Picamera2, OpenCV, FastAPI, libgpiod(gpioset)。
 - `camera_service`
-  - 役割: カメラプレビュー(MJPEG)、静止画撮影、LED制御、UIの配信。
-  - 主要依存: Picamera2, OpenCV, FastAPI, libgpiod(gpioset)。【F:dashcam/camera_service/app.py†L1-L171】
+  - 役割: カメラプレビュー(MJPEG)、静止画撮影、LED制御、
+  - 主要依存: Picamera2, OpenCV, FastAPI, libgpiod(gpioset)。
 - `sensor_service`
-  - 役割: MMC5983MA 磁気センサの方位角取得、UI向けSSE配信。
-  - 主要依存: smbus2, FastAPI。【F:dashcam/sensor_service/app.py†L1-L259】
-- UI
-  - `camera_service/static` 配下の HTML/CSS/JS で構成。
-  - `sensor_service` のSSEに接続し、方位角/距離情報を表示。【F:dashcam/camera_service/static/index.html†L1-L153】【F:dashcam/camera_service/static/ui.js†L1-L259】
+  - 役割1: MMC5983MA 磁気センサの方位角取得、UI向けSSE配信。
+  - 役割2: MMC5983MA 磁気センサの方位角取得、UI向けSSE配信。
+  - 主要依存1: smbus2, FastAPI。【F:dashcam/sensor_service/app.py†L1-L259】
 
 ## ディレクトリ構成
 - `dashcam/camera_service/`

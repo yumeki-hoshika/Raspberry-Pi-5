@@ -1,0 +1,56 @@
+borehole/
+├─ SPEC_JP.md                    # 日本語仕様書（完成版）
+├─ config.yaml                   # 設定（単一の正）
+├─ README.md                     # 起動方法・運用（任意）
+├─ .gitignore                    # data/ 等を除外
+│
+├─ camera_service/
+│  ├─ app.py                     # カメラAPI / MJPEG / 撮影 / 録画 / LED制御 / UI配信
+│  ├─ config_loader.py           # config.yaml 読み込み（任意）
+│  ├─ exif/
+│  │  └─ exif_writer.py          # 静止画EXIF(GPSImgDirection)書き込み
+│  ├─ video/
+│  │  ├─ recorder.py             # 録画制御（開始/停止/保存）
+│  │  └─ meta_writer.py          # meta.json 書き込み（方位・条件）
+│  ├─ static/
+│  │  ├─ index.html              # UI
+│  │  ├─ ui.css                  # UIスタイル（色分け・警告・凡例）
+│  │  └─ ui.js                   # UIロジック（SSE購読、設定反映、ⓘ凡例）
+│  └─ templates/                 # （必要なら）
+│
+├─ sensor_service/
+│  ├─ app.py                     # センサ計測/集計/SSE/最新値API
+│  ├─ config_loader.py           # config.yaml 読み込み（任意）
+│  ├─ sensors/
+│  │  ├─ mmc5983.py              # 磁気センサ（I2C）
+│  │  ├─ pca9546.py              # I2Cマルチプレクサ制御
+│  │  ├─ sht31.py                # 温湿度（I2C）
+│  │  └─ tsd10.py                # 距離センサ（UART）
+│  ├─ logic/
+│  │  ├─ dewpoint.py             # 露点計算（Magnus）
+│  │  ├─ condensation.py         # 結露リスク判定（閾値）
+│  │  └─ orientation.py          # 真方位算出（偏角＋オフセット＋wrap）
+│  └─ logging/
+│     └─ csv_logger.py           # CSV書き込み（data/csv）
+│
+├─ data/                         # ★実行時生成物（Git管理外）
+│  ├─ cam/                       # 静止画（EXIFに方位）
+│  │  └─ YYYYMMDD_HHMMSS/
+│  │     ├─ cam0_..._000001.jpg
+│  │     └─ cam1_..._000001.jpg
+│  ├─ video/                     # 動画（meta.jsonに方位）
+│  │  └─ YYYYMMDD_HHMMSS/
+│  │     ├─ cam0_YYYYMMDD_HHMMSS.mp4
+│  │     ├─ cam1_YYYYMMDD_HHMMSS.mp4
+│  │     └─ meta.json
+│  └─ csv/                       # センサログ
+│     ├─ sensors_YYYYMMDD.csv
+│     └─ sensors_YYYYMMDD_HH.csv
+│
+├─ systemd/                      # 運用（任意）
+│  ├─ camera_service.service
+│  └─ sensor_service.service
+│
+└─ scripts/                      # 補助（任意）
+   ├─ init_dirs.sh               # data/ 以下作成・権限設定
+   └─ export_session.sh          # セッション単位で書き出し/圧縮

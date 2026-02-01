@@ -1,3 +1,5 @@
+# Borehole Monitoring System Configuration
+
 storage:
   cam:
     dir: "/home/admin/borehole/data/cam"
@@ -9,14 +11,49 @@ storage:
   csv:
     dir: "/home/admin/borehole/data/csv"
 
+sampling:
+  magnetic:
+    ui_interval_sec: 0.5
+    aggregation: median
+  temperature_humidity:
+    ui_interval_sec: 1.0
+    aggregation: median
+  distance:
+    ui_interval_sec: 1.0
+    aggregation: median
+
+condensation:
+  enable: true
+  dewpoint:
+    method: magnus
+    magnus:
+      a: 17.62
+      b: 243.12
+  thresholds:
+    safe_delta_c: 3.0
+    caution_delta_c: 1.0
+    condensing_delta_c: 0.0
+  ui:
+    enable_color_coding: true
+    temperature_colors:
+      ambient: "#4da3ff"
+      internal: "#ff9f4d"
+    risk_colors:
+      SAFE: "#4caf50"
+      CAUTION: "#ffeb3b"
+      WARNING: "#ff9800"
+      CONDENSING: "#f44336"
+    legend:
+      enable: true
+      show_formula: true
+      show_thresholds: true
+
 orientation:
   magnetic_declination_deg: 7.4
   camera_offset_deg:
     cam0: 0.0
     cam1: -90.0
-
-condensation:
-  thresholds:
-    safe_delta_c: 3.0
-    caution_delta_c: 1.0
-    condensing_delta_c: 0.0
+  exif:
+    enable: true
+    img_direction_ref: "T"
+    quantize_deg: 0.01

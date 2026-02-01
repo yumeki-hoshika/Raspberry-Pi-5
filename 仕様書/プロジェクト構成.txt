@@ -1,56 +1,79 @@
 borehole/
-├─ SPEC_JP.md                    # 日本語仕様書（完成版）
-├─ config.yaml                   # 設定（単一の正）
-├─ README.md                     # 起動方法・運用（任意）
-├─ .gitignore                    # data/ 等を除外
+├─ SPEC_JP.md                     # 日本語仕様書（最終版）
+├─ UI_SPEC.md                     # UI仕様書（最終版）
+├─ config.yaml                    # 設定（単一の正）
+├─ README.md                      # 起動方法・運用
+├─ .gitignore                     # data/ 等を除外
 │
-├─ camera_service/
-│  ├─ app.py                     # カメラAPI / MJPEG / 撮影 / 録画 / LED制御 / UI配信
-│  ├─ config_loader.py           # config.yaml 読み込み（任意）
-│  ├─ exif/
-│  │  └─ exif_writer.py          # 静止画EXIF(GPSImgDirection)書き込み
-│  ├─ video/
-│  │  ├─ recorder.py             # 録画制御（開始/停止/保存）
-│  │  └─ meta_writer.py          # meta.json 書き込み（方位・条件）
+├─ ui_service/                    # ★ UI配信専用（新設）
+│  ├─ app.py                      # UI配信 / 設定画面 / ルーティング
 │  ├─ static/
-│  │  ├─ index.html              # UI
-│  │  ├─ ui.css                  # UIスタイル（色分け・警告・凡例）
-│  │  └─ ui.js                   # UIロジック（SSE購読、設定反映、ⓘ凡例）
-│  └─ templates/                 # （必要なら）
+│  │  ├─ index.html               # メインUI
+│  │  ├─ settings.html            # 設定画面（キャリブレーション/設定）
+│  │  ├─ ui.css                   # UIスタイル（警告/凡例/色分け）
+│  │  └─ ui.js                    # UIロジック（SSE購読/警告/設定操作）
+│  └─ assets/                     # アイコン・画像等
+│
+├─ camera_service/                # ★ UI配信は行わない
+│  ├─ app.py                      # カメラAPI / MJPEG / 撮影 / 録画 / LED制御
+│  ├─ config_loader.py            # config.yaml 読み込み
+│  ├─ exif/
+│  │  └─ exif_writer.py           # 静止画EXIF（GPSImgDirection等）
+│  ├─ video/
+│  │  ├─ recorder.py              # 録画制御（開始/停止）
+│  │  └─ meta_writer.py           # 動画メタ（方位/条件）
+│  └─ gpio/
+│     └─ pwm.py                   # PWM/LED制御（フェイルセーフ）
 │
 ├─ sensor_service/
-│  ├─ app.py                     # センサ計測/集計/SSE/最新値API
-│  ├─ config_loader.py           # config.yaml 読み込み（任意）
+│  ├─ app.py                      # センサ計測/集計/SSE/記録制御
+│  ├─ config_loader.py            # config.yaml 読み込み
 │  ├─ sensors/
-│  │  ├─ mmc5983.py              # 磁気センサ（I2C）
-│  │  ├─ pca9546.py              # I2Cマルチプレクサ制御
-│  │  ├─ sht31.py                # 温湿度（I2C）
-│  │  └─ tsd10.py                # 距離センサ（UART）
+│  │  ├─ mmc5983.py               # 磁気センサ（I2C）
+│  │  ├─ pca9546.py               # I2Cマルチプレクサ
+│  │  ├─ sht31.py                 # 温湿度
+│  │  └─ tsd10.py                 # 距離センサ（UART）
 │  ├─ logic/
-│  │  ├─ dewpoint.py             # 露点計算（Magnus）
-│  │  ├─ condensation.py         # 結露リスク判定（閾値）
-│  │  └─ orientation.py          # 真方位算出（偏角＋オフセット＋wrap）
-│  └─ logging/
-│     └─ csv_logger.py           # CSV書き込み（data/csv）
+│  │  ├─ heading.py               # 方位算出（キャリブ補正込み）
+│  │  ├─ dewpoint.py              # 露点計算（Magnus）
+│  │  ├─ condensation.py          # 結露リスク判定
+│  │  └─ statistics.py            # median/valid_ratio算出
+│  ├─ record/
+│  │  ├─ recorder.py              # 記録モード開始/停止/警告管理
+│  │  ├─ csv_writer.py            # センサ別CSV出力
+│  │  └─ recovery.py              # 起動時回収（OPEN→CLOSED）
+│  ├─ calibration/
+│  │  └─ magnetometer.py          # ★単一キャリブファイル管理
+│  └─ api/
+│     ├─ sensors.py               # /api/sensors/*
+│     ├─ record.py                # /api/record/*
+│     ├─ calibration.py           # /api/mag/calibration/*
+│     └─ files.py                 # ファイルビュワーAPI
 │
-├─ data/                         # ★実行時生成物（Git管理外）
-│  ├─ cam/                       # 静止画（EXIFに方位）
+├─ data/                          # ★ 実行時生成物（Git管理外）
+│  ├─ cam/                        # 静止画
 │  │  └─ YYYYMMDD_HHMMSS/
-│  │     ├─ cam0_..._000001.jpg
-│  │     └─ cam1_..._000001.jpg
-│  ├─ video/                     # 動画（meta.jsonに方位）
+│  │     ├─ cam0_YYYYMMDD_HHMMSS.jpg
+│  │     └─ cam1_YYYYMMDD_HHMMSS.jpg
+│  ├─ video/                      # 動画
 │  │  └─ YYYYMMDD_HHMMSS/
 │  │     ├─ cam0_YYYYMMDD_HHMMSS.mp4
 │  │     ├─ cam1_YYYYMMDD_HHMMSS.mp4
 │  │     └─ meta.json
-│  └─ csv/                       # センサログ
-│     ├─ sensors_YYYYMMDD.csv
-│     └─ sensors_YYYYMMDD_HH.csv
+│  ├─ csv/                        # センサ別CSV
+│  │  ├─ heading_YYYYMMDD_HHMMSS_OPEN.csv
+│  │  ├─ distance_YYYYMMDD_HHMMSS_OPEN.csv
+│  │  ├─ ambient_YYYYMMDD_HHMMSS_OPEN.csv
+│  │  └─ internal_YYYYMMDD_HHMMSS_OPEN.csv
+│  └─ calibration/                # ★ 単一キャリブレーション
+│     └─ magnetometer_calibration.json
 │
-├─ systemd/                      # 運用（任意）
+├─ systemd/
+│  ├─ ui_service.service
 │  ├─ camera_service.service
 │  └─ sensor_service.service
 │
-└─ scripts/                      # 補助（任意）
-   ├─ init_dirs.sh               # data/ 以下作成・権限設定
-   └─ export_session.sh          # セッション単位で書き出し/圧縮
+└─ scripts/
+   ├─ init_dirs.sh                # data/ 初期化・権限設定
+   ├─ backup_config.sh            # config.yaml バックアップ
+   └─ export_session.sh           # セッション単位書き出し

@@ -1,58 +1,41 @@
-<<<<<<< HEAD
-# Dashcam システム仕様書（完全版）
+# Borehole Monitoring System Specification (Final)
 
-（※ ここでは ChatGPT 側で省略せず、ユーザーに提示した完全版仕様書本文がそのまま保存されます）
-=======
-# Dashcam 仕様書（完成版・最終確定）
+## 1. Purpose
+This system provides an integrated borehole monitoring dashboard on Raspberry Pi 5, including:
+- Dual wide-angle camera preview and still capture
+- Video recording with metadata
+- PWM-controlled LED lighting (2 channels)
+- Magnetic heading measurement
+- Single-point LiDAR distance measurement
+- Ambient and internal temperature / humidity monitoring
+- Dew point calculation and condensation risk warning
 
----
+## 2. Data Storage
+All runtime-generated data are stored under the data directory:
+- Still images: data/cam/
+- Videos: data/video/
+- Sensor CSV logs: data/csv/
 
-## 1. 目的
+## 3. Orientation Handling
+### Still Images
+- Camera direction is stored in EXIF (GPSImgDirection, True North).
 
-Raspberry Pi 5 上で以下の機能を統合的に提供するダッシュカム／計測可視化システムを構築する。
+### Videos
+- Camera direction is NOT stored in the video file.
+- Direction and related metadata are stored in meta.json.
 
-- カメラモジュール V3（広角）×2  
-  - プレビュー表示（MJPEG）
-  - 静止画撮影
-  - 露出補正（EV）
-  - **最高画質での動画撮影（開始／停止）**
-- LED ×2 系統の PWM 制御
-- 磁気センサによる方位角計測（水平設置前提）
-- 距離センサによる距離計測（単位：m）
-- 温湿度センサによる外気／筐体内の温湿度計測
-- 記録モード時の **センサ別 CSV 保存（開始／終了制御）**
-- 保存データ（画像・動画・CSV）を Web UI から参照・ダウンロード
+### Direction Definition
+direction_deg_true = wrap360(
+  heading_deg_mag
+  + magnetic_declination_deg
+  + camera_offset_deg[cam_id]
+)
 
----
+## 4. Condensation Risk
+Condensation risk is evaluated from ambient dew point and internal temperature.
+Thresholds are configurable via YAML.
 
-## 2. システム構成
-
-### サービス構成（責務分離）
-
-#### UI_service
-- Web UI（HTML / CSS / JavaScript）配信
-- camera_service / sensor_service の API を呼び出すフロントエンド
-- sensor_service の SSE を購読して画面更新
-- 記録継続警告ポップアップの表示
-
-#### camera_service
-- cam0 / cam1 プレビュー（MJPEG）
-- 静止画撮影
-- 最高画質動画撮影（開始／停止）
-- LED 制御
-- **UI の静的配信は行わない**
-
-#### sensor_service
-- 磁気・距離・温湿度センサ計測
-- SSE 配信（UI 向け）
-- 記録モード制御（開始／終了）
-- センサ別 CSV 出力
-- 記録継続時間監視・警告イベント発行
-- クラッシュ／再起動時の記録回収
-- ファイルビュワー（画像・動画・CSV の一覧／DL）
-
----
-
-## 3. UI 仕様
-（以下略：これまで提示した完成版仕様と同一）
->>>>>>> 8a7843a95d844bbd453717b8c64be1296f2a87f2
+## 5. UI
+- Color-coded ambient/internal temperature
+- Condensation warning with legend (ⓘ button)
+- Configurable thresholds

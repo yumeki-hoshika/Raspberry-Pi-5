@@ -1,0 +1,25 @@
+{
+  "session_id": "20260201_143512",
+  "start_time": "2026-02-01T14:35:12+09:00",
+  "end_time": "2026-02-01T14:45:12+09:00",
+  "video": {
+    "format": "mp4",
+    "codec": "H.264",
+    "fps": 15,
+    "resolution": "1536x864"
+  },
+  "orientation": {
+    "reference": "TRUE",
+    "magnetic_declination_deg": 7.4,
+    "cam0": {
+      "heading_deg_mag": 123.4,
+      "camera_offset_deg": 0.0,
+      "direction_deg_true": 130.8
+    },
+    "cam1": {
+      "heading_deg_mag": 123.4,
+      "camera_offset_deg": -90.0,
+      "direction_deg_true": 40.8
+    }
+  }
+}
